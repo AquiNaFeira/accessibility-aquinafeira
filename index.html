@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aqui na Feira - Tradução em Libras</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; line-height: 1.6; color: #1b1b1b; background: #fff; }
+    h1 { font-size: 1.1rem; color: #1B5E20; margin: 0 0 4px; }
+    .dica { font-size: .9rem; color: #555; margin: 0 0 20px; }
+    #conteudo { font-size: 1.25rem; white-space: pre-wrap; }
+    #erro { display: none; margin-top: 20px; padding: 12px; border: 1px solid #b00020; border-radius: 8px; color: #b00020; }
+  </style>
+</head>
+<body>
+  <h1>Aqui na Feira</h1>
+  <p class="dica">Toque no texto abaixo para ver a tradução em Libras.</p>
+  <p id="conteudo"></p>
+  <p id="erro" role="alert">Não foi possível carregar o VLibras. Verifique sua conexão e tente novamente.</p>
+
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    (function () {
+      // O texto vem depois do "#", que o navegador não envia ao servidor (mais privado)
+      var params = new URLSearchParams(location.hash.slice(1));
+      var texto = (params.get('t') || '').slice(0, 2000);
+      // textContent evita injeção de HTML/script pela URL
+      document.getElementById('conteudo').textContent =
+        texto || 'Nenhum texto foi enviado para tradução.';
+
+      if (window.VLibras) {
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+        // Abre o avatar automaticamente (opcional; remova se der comportamento estranho)
+        setTimeout(function () {
+          var b = document.querySelector('[vw-access-button]');
+          if (b) b.click();
+        }, 1500);
+      } else {
+        document.getElementById('erro').style.display = 'block';
+      }
+    })();
+  </script>
+</body>
+</html>
