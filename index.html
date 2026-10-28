@@ -29,6 +29,13 @@
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
     (function () {
+      function notify(type, detail) {
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: type, detail: detail }));
+        }
+      }
+      window.addEventListener('error', function (e) { notify('error', e.message); });
+      window.addEventListener('unhandledrejection', function (e) { notify('error', String(e.reason)); });
       // Captura o texto do parâmetro t na URL (#t=...)
       var params = new URLSearchParams(location.hash.slice(1));
       var texto = (params.get('t') || '').slice(0, 2000);
@@ -50,8 +57,9 @@
           }, 2500); // Tempo necessário para o avatar carregar com segurança
         });
       } else {
-        document.getElementById('erro').style.display = 'block';
-      }
+          document.getElementById('erro').style.display = 'block';
+          notify('script-missing', 'VLibras não carregou');
+        }
     })();
   </script>
 </body>
