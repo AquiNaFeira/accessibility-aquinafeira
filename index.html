@@ -5,20 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Aqui na Feira - Tradução em Libras</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; line-height: 1.6; color: #1b1b1b; background: #fff; }
-    h1 { font-size: 1.1rem; color: #1B5E20; margin: 0 0 4px; }
-    .dica { font-size: .9rem; color: #555; margin: 0 0 20px; }
-    #conteudo { font-size: 1.25rem; white-space: pre-wrap; font-weight: bold; padding: 12px; background: #f4f4f4; border-radius: 8px; }
-    #erro { display: none; margin-top: 20px; padding: 12px; border: 1px solid #b00020; border-radius: 8px; color: #b00020; }
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 10px; line-height: 1.4; color: #1b1b1b; background: #fff; }
+    #conteudo { font-size: 1rem; white-space: pre-wrap; font-weight: bold; padding: 8px; background: #f4f4f4; border-radius: 8px; max-height: 5em; overflow: auto; }
+    #erro { display: none; margin-top: 12px; padding: 10px; border: 1px solid #b00020; border-radius: 8px; color: #b00020; }
   </style>
 </head>
 <body>
-  <h1>Aqui na Feira</h1>
-  <p class="dica">Toque no texto abaixo para ver a tradução em Libras.</p>
   <p id="conteudo"></p>
-  <p id="erro" role="alert">Não foi possível carregar o VLibras. Verifique sua conexão e tente novamente.</p>
+  <p id="erro" role="alert">Não foi possível carregar o VLibras.</p>
 
-  <!-- Estrutura do Widget VLibras -->
   <div vw class="enabled">
     <div vw-access-button class="active"></div>
     <div vw-plugin-wrapper>
@@ -35,31 +30,30 @@
         }
       }
       window.addEventListener('error', function (e) { notify('error', e.message); });
-      window.addEventListener('unhandledrejection', function (e) { notify('error', String(e.reason)); });
-      // Captura o texto do parâmetro t na URL (#t=...)
+
+      var el = document.getElementById('conteudo');
       var params = new URLSearchParams(location.hash.slice(1));
-      var texto = (params.get('t') || '').slice(0, 2000);
-      
-      document.getElementById('conteudo').textContent =
-        texto || 'Nenhum texto foi enviado para tradução.';
+      el.textContent = (params.get('t') || '').slice(0, 2000) || 'Ative "Selecionar" e toque em um texto do app.';
+
+      // O app chama esta função para traduzir um texto
+      window.vlibrasTranslate = function (texto) {
+        el.textContent = String(texto || '').slice(0, 1500);
+        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      };
 
       if (window.VLibras) {
-        // Inicializa o widget
         new window.VLibras.Widget('https://vlibras.gov.br/app');
-
-        // Aguarda o carregamento completo da página e dos scripts do VLibras
         window.addEventListener('load', function () {
           setTimeout(function () {
-            var accessButton = document.querySelector('[vw-access-button]');
-            if (accessButton) {
-              accessButton.click(); // Abre o avatar automaticamente
-            }
-          }, 2500); // Tempo necessário para o avatar carregar com segurança
+            var b = document.querySelector('[vw-access-button]');
+            if (b) b.click();
+            notify('ready');
+          }, 2500);
         });
       } else {
-          document.getElementById('erro').style.display = 'block';
-          notify('script-missing', 'VLibras não carregou');
-        }
+        document.getElementById('erro').style.display = 'block';
+        notify('script-missing', 'VLibras não carregou');
+      }
     })();
   </script>
 </body>
